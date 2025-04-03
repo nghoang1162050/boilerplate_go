@@ -1,4 +1,4 @@
-package repository
+package models
 
 type ProductVModel struct {
 	Id    int     `json:"id"`
@@ -6,7 +6,7 @@ type ProductVModel struct {
 	Price float64 `json:"price"`
 }
 
-func (model *ProductVModel) MapToVModel() *Product {
+func (model *ProductVModel) MapToModel() *Product {
 	return &Product{
 		Id:    model.Id,
 		Name:  model.Name,

@@ -1,9 +1,14 @@
-package repository
+package models
 
 import (
-	"boilerplate_go/domain"
 	"context"
 )
+
+type Product struct {
+	Id    int     `gorm:"column:id;type:"int";primaryKey"`
+	Name  string  `gorm:"column:name;type:nvarchar(45)"`
+	Price float64 `gorm:"column:price;type:decimal(10,2)"`
+}
 
 var product *Product = &Product{}
 
@@ -11,18 +16,12 @@ func ProductModel() *Product {
 	return product
 }
 
-func (model *Product) MapToVModel() *domain.ProductVModel {
-	return &domain.ProductVModel{
+func (model *Product) MapToVModel() *ProductVModel {
+	return &ProductVModel{
 		Id: model.Id,
 		Name: model.Name,
 		Price: model.Price,
 	}
-}
-
-type Product struct {
-	Id int `gorm:"column:id;type:"int";primaryKey"`
-	Name string  `gorm:"column:name;type:nvarchar(45)"`
-	Price float64 `gorm:"column:price;type:decimal(10,2)"`
 }
 
 func (model *Product) GetAll(ctx context.Context) (models []Product, err error) {

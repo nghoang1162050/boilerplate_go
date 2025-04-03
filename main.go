@@ -1,8 +1,8 @@
 package main
 
 import (
-	"boilerplate_go/internal/repository"
-	"boilerplate_go/internal/rest"
+	"boilerplate_go/internal/db/models"
+	"boilerplate_go/pkg/api/routers"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,7 +29,7 @@ func main() {
 			dbUser, dbPass, dbHost, dbPort, dbName)),
 		&gorm.Config{},
 	)
-	repository.Init(db)
+	models.Init(db)
 
 	if err != nil {
 		log.Fatal("Failed to connect to the database:", err)
@@ -38,7 +38,7 @@ func main() {
 	// prepare repository and services
 	// productService := services.InitProductService(nil)
 
-	rest.NewProductHandler(e)
+	routers.InitProductRouter(e)
 
 	log.Fatal(e.Start(":8080"))
 }
