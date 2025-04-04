@@ -1,10 +1,13 @@
 package products
 
 import (
+	"boilerplate_go/internal/cache"
 	"boilerplate_go/internal/models"
 	"boilerplate_go/pkg/api/handlers"
 	"boilerplate_go/pkg/api/helpers"
 	constants "boilerplate_go/pkg/utils"
+	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -20,6 +23,21 @@ func GetAll(c echo.Context) error {
 	if err := helpers.Validate(searchModel); err != nil {
 		return c.JSON(400, handlers.ValidationErrors(err))
 	}
+
+	ctx := c.Request().Context()
+    cacheKey := fmt.Sprintf("products:list:name=%s:price=%v:page=%d:pageSize=%d",
+        searchModel.Name,
+        searchModel.Price,
+        searchModel.PageNumber,
+        searchModel.PageSize,
+    )
+    cached, _ := cache.RedisClient.Get(ctx, cacheKey)
+    if cached != "" {
+        var payload models.ProductsVModel
+        if err := json.Unmarshal([]byte(cached), &payload); err == nil {
+            return c.JSON(200, handlers.Success(payload))
+        }
+    }
 
 	products, total, err := models.ProductModel().GetAll(c.Request().Context(), &searchModel)
 	if err != nil {
@@ -37,6 +55,12 @@ func GetAll(c echo.Context) error {
 
 	for i, p := range products {
 		payload.Products[i] = *p.MapToVModel()
+	}
+
+	// Set payload to Redis
+	data, _ := json.Marshal(payload)
+	if err:= cache.RedisClient.Set(ctx, cacheKey, string(data)); err != nil {
+		return c.JSON(500, handlers.Error(constants.MSG_INTERNAL_SERVER, err))
 	}
 
 	return c.JSON(200, handlers.Success(payload))

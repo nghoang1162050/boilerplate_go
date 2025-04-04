@@ -1,6 +1,7 @@
 package main
 
 import (
+	"boilerplate_go/internal/cache"
 	"boilerplate_go/pkg/api/middlewares"
 	"boilerplate_go/pkg/pub_proc"
 	"log"
@@ -8,7 +9,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+
 func main() {
+	// Initialize configuration
+	cache.RedisClient = &cache.CacheClient{}
+    if err := cache.RedisClient.NewRedisCache(); err != nil {
+        log.Fatalf("Failed to initialize Redis: %v", err)
+    }
+
 	e := echo.New()
 	
 	// Middleware
