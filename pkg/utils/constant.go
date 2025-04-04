@@ -55,6 +55,9 @@ const (
 	MSG_FORBIDDEN                   string = "forbidden"
 	MSG_UNKNOWN_DB_PLATFORM         string = "unknown database platform"
 	MSG_INTERNAL_SERVER             string = "internal server error"
+
+	// TODO: remove later
+	JWT_SECRET_KEY string = "78df74878a73fc1bbad6f30b4458eee12298b6faa8cc3063ac680febdea40fc2"
 )
 
 var (
