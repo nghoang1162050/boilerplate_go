@@ -1,19 +1,62 @@
 package products
 
 import (
-	"boilerplate_go/internal/db/models"
+	"boilerplate_go/internal/models"
 	"boilerplate_go/pkg/api/handlers"
+	"boilerplate_go/pkg/api/helpers"
+	constants "boilerplate_go/pkg/utils"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
 
 func GetAll(c echo.Context) error {
-	products, _ := models.ProductModel().GetAll(c.Request().Context())
+	searchModel := models.SearchProductVModel{}
 
-	var payload []models.ProductVModel
-	for _, product := range products {
-		payload = append(payload, *product.MapToVModel())
+	if err := c.Bind(&searchModel); err != nil {
+		return helpers.Error(c, constants.ERROR_BINDING_BODY, err)
+	}
+
+	if err := helpers.Validate(searchModel); err != nil {
+		return c.JSON(400, handlers.ValidationErrors(err))
+	}
+
+	products, total, err := models.ProductModel().GetAll(c.Request().Context(), &searchModel)
+	if err != nil {
+		return c.JSON(500, handlers.Error(constants.MSG_INTERNAL_SERVER, err))
+	}		
+
+	payload := models.ProductsVModel{
+		Products: make([]models.ProductVModel, len(products)),
+		Pagination: models.NewPagination( 
+			searchModel.PageNumber,
+			searchModel.PageSize,
+			total,
+		),
+	}
+
+	for i, p := range products {
+		payload.Products[i] = *p.MapToVModel()
 	}
 
 	return c.JSON(200, handlers.Success(payload))
+}
+
+func GetById(c echo.Context) error {
+	idParam := c.Param("id")
+	id, err := strconv.Atoi(idParam)
+	if err != nil {
+        return c.JSON(400, handlers.Error("invalid ID parameter", err))
+    }
+
+	product, err := models.ProductModel().GetById(c.Request().Context(), id)
+	if err != nil {
+		return c.JSON(500, handlers.Error(constants.MSG_INTERNAL_SERVER, err))
+	}
+
+	if product == nil {
+		return c.JSON(404, handlers.Error(constants.MSG_RECORD_NOT_FOUND, nil))
+	}
+
+	return c.JSON(200, handlers.Success(product.MapToVModel()))
 }

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"boilerplate_go/internal/db/models"
-	"boilerplate_go/pkg/api/routers"
+	"boilerplate_go/internal/models"
+	"boilerplate_go/pkg/pub_proc"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,8 +37,7 @@ func main() {
 
 	// prepare repository and services
 	// productService := services.InitProductService(nil)
-
-	routers.InitProductRouter(e)
+	pub_proc.PublicRouter(e)
 
 	log.Fatal(e.Start(":8080"))
 }

@@ -16,19 +16,10 @@ func BuildResponse(code string, message string, errors []string, payload interfa
 	return r
 }
 
-// func GetStatusCode(err error) int {
-// 	if err == nil {
-// 		return http.StatusOK
-// 	}
-
-// 	switch err {
-// 	case domain.ErrInternalServerError:
-// 		return http.StatusInternalServerError
-// 	case domain.ErrNotFound:
-// 		return http.StatusNotFound
-// 	case domain.ErrConflict:
-// 		return http.StatusConflict
-// 	default:
-// 		return http.StatusInternalServerError
-// 	}
-// }
+type FieldValidationError struct {
+	Namespace string      `json:"namespace"`
+	Field     string      `json:"field"`
+	Error     string      `json:"error"`
+	Kind      string      `json:"kind"`
+	Value     interface{} `json:"value"`
+}
