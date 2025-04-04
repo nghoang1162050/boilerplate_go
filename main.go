@@ -12,6 +12,14 @@ func main() {
 	e := echo.New()
 	
 	// Middleware
+	// e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
+	// 	XSSProtection:         "",
+	// 	ContentTypeNosniff:    "",
+	// 	XFrameOptions:         "",
+	// 	HSTSMaxAge:            3600,
+	// 	ContentSecurityPolicy: "default-src 'self'",
+	// }))
+	// custom middleware for retricted apis
 	e.Use(middlewares.AuthenticationMiddleware())
 	
 	// Routes
