@@ -1,0 +1,71 @@
+definitions:
+  models.Pagination:
+    properties:
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  models.ProductVModel:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      price:
+        type: number
+    required:
+    - id
+    - name
+    type: object
+  models.ProductsVModel:
+    properties:
+      pagination:
+        $ref: '#/definitions/models.Pagination'
+      products:
+        items:
+          $ref: '#/definitions/models.ProductVModel'
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of products with pagination
+      parameters:
+      - description: Search by name
+        in: query
+        name: name
+        type: string
+      - description: Filter by price
+        in: query
+        name: price
+        type: number
+      - description: Page number
+        in: query
+        name: pageNumber
+        required: true
+        type: integer
+      - description: Page size
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProductsVModel'
+      summary: Get all products
+      tags:
+      - products
+swagger: "2.0"

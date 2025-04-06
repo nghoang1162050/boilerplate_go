@@ -13,6 +13,18 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// GetAll godoc
+// @Summary Get all products
+// @Description Retrieves a list of products with pagination
+// @Tags products
+// @Accept json
+// @Produce json
+// @Param name query string false "Search by name"
+// @Param price query number false "Filter by price"
+// @Param pageNumber query int true "Page number"
+// @Param pageSize query int true "Page size"
+// @Success 200 {object} models.ProductsVModel
+// @Router /products [get]
 func GetAll(c echo.Context) error {
 	searchModel := models.SearchProductVModel{}
 

@@ -12,7 +12,7 @@ func AuthenticationMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			// skip authentication for login
-			if c.Path() == "/login" {
+			if c.Path() == "/login" || c.Path() == "/swagger/*" {
 				return next(c)
 			}
 

@@ -6,9 +6,11 @@ import (
 	"boilerplate_go/pkg/pub_proc"
 	"log"
 
-	"github.com/labstack/echo/v4"
-)
+	_ "boilerplate_go/docs"
 
+	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
+)
 
 func main() {
 	// Initialize configuration
@@ -30,6 +32,7 @@ func main() {
 	// custom middleware for retricted apis
 	e.Use(middlewares.AuthenticationMiddleware())
 	
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 	// Routes
 	pub_proc.InitDbClient()
 	pub_proc.PublicRouter(e)
