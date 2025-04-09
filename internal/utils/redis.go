@@ -2,6 +2,8 @@ package utils
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -13,7 +15,9 @@ type CacheClient struct {
 var RedisClient *CacheClient
 
 func (c *CacheClient) NewRedisCache() error {
-	url := "redis://127.0.0.1:6379/0?protocol=3"
+	host := os.Getenv("REDIS_HOST")
+	port := os.Getenv("REDIS_PORT")
+	url := fmt.Sprintf("redis://%s:%s/0?protocol=3", host, port)
 	options, err := redis.ParseURL(url)
 	if err != nil {
 		panic(err)

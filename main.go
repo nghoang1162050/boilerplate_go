@@ -12,12 +12,23 @@ import (
 	"boilerplate_go/internal/usecase"
 	"boilerplate_go/internal/utils"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
+// @title Swagger Example API
+// @version 1.0
+// @description This is a sample server boilerplate_go server.
+// @termsOfService http://swagger.io/terms/
 func main() {
 	// gen entity models
 	// cmd.GenModels()
+	// Load .env file
+	
+    if err := godotenv.Load(); err != nil {
+        log.Println("No .env file found, proceeding with environment variables")
+    }
 
 	// Initialize Redis client
 	cacheClient := &utils.CacheClient{}
@@ -38,6 +49,7 @@ func main() {
 
 	e := echo.New()
 	router.NewProductRouter(e, productController)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	log.Fatal(e.Start(":8080"))
 }

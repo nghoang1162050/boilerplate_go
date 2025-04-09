@@ -20,7 +20,23 @@ type productController struct {
 	productUseCase usecase.ProductUseCase
 }
 
+func NewProductController(productUseCase usecase.ProductUseCase) ProductController {
+	return &productController{productUseCase: productUseCase}
+}
+
 // Search implements ProductController.
+// @Summary Search Products
+// @Description Retrieves products based on search query, page number and page size.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param keyword query string false "Search Keyword"
+// @Param pageNumber query int true "Page Number (>=1)"
+// @Param pageSize query int true "Page Size (>=1)"
+// @Success 200 {object} dto.BaseResponse
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {object} dto.BaseResponse
+// @Router /products [get]
 func (p *productController) Search(ctx echo.Context) error {
 	var searchModel dto.SearchProductDto
 	if err := ctx.Bind(&searchModel); err != nil {
@@ -35,11 +51,15 @@ func (p *productController) Search(ctx echo.Context) error {
 	return ctx.JSON(200, result)
 }
 
-func NewProductController(productUseCase usecase.ProductUseCase) ProductController {
-	return &productController{productUseCase: productUseCase}
-}
-
 // GetAll implements ProductController.
+// @Summary List All Products
+// @Description Retrieves a list of all products.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.ProductDto
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /products/all [get]
 func (p *productController) GetAll(ctx echo.Context) error {
 	products, err := p.productUseCase.GetAll()
 	if err != nil {
@@ -50,6 +70,16 @@ func (p *productController) GetAll(ctx echo.Context) error {
 }
 
 // GetByID implements ProductController.
+// @Summary Get Product By ID
+// @Description Retrieves a product by its identifier.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 200 {object} dto.ProductDto
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /products/{id} [get]
 func (p *productController) GetByID(ctx echo.Context) error {
 	idParam := ctx.Param("id")
 	product, err := p.productUseCase.GetByID(idParam)
@@ -60,6 +90,16 @@ func (p *productController) GetByID(ctx echo.Context) error {
 }
 
 // Create implements ProductController.
+// @Summary Create Product
+// @Description Creates a new product with the provided payload.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param product body dto.ProductDto true "Product Data"
+// @Success 201 {object} dto.ProductDto
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /products [post]
 func (p *productController) Create(ctx echo.Context) error {
 	var productDto dto.ProductDto
 
@@ -75,6 +115,17 @@ func (p *productController) Create(ctx echo.Context) error {
 }
 
 // Update implements ProductController.
+// @Summary Update Product
+// @Description Updates an existing product with the specified ID.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Param product body dto.ProductDto true "Updated Product Data"
+// @Success 200 {object} dto.ProductDto
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /products/{id} [put]
 func (p *productController) Update(ctx echo.Context) error {
 	var productDto dto.ProductDto
 
@@ -90,6 +141,16 @@ func (p *productController) Update(ctx echo.Context) error {
 }
 
 // Delete implements ProductController.
+// @Summary Delete Product
+// @Description Deletes a product with the specified ID.
+// @Tags Products
+// @Accept json
+// @Produce json
+// @Param id path string true "Product ID"
+// @Success 204 {string} string "No Content"
+// @Failure 400 {string} string "Bad Request"
+// @Failure 500 {string} string "Internal Server Error"
+// @Router /products/{id} [delete]
 func (p *productController) Delete(ctx echo.Context) error {
 	id := ctx.Param("id")
 	if err := p.productUseCase.Delete(id); err != nil {

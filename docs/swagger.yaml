@@ -1,59 +1,70 @@
 definitions:
-  models.Pagination:
+  dto.BaseResponse:
     properties:
-      page:
+      code:
         type: integer
-      pageSize:
-        type: integer
-      totalCount:
-        type: integer
-      totalPages:
-        type: integer
+      data: {}
+      message:
+        type: string
     type: object
-  models.ProductVModel:
+  dto.ProductDto:
     properties:
+      brand:
+        type: string
+      cpu:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      gpu:
+        type: string
       id:
-        type: integer
+        type: string
       name:
         type: string
       price:
         type: number
+      ram:
+        type: string
+      stock_quantity:
+        minimum: 0
+        type: integer
+      storage:
+        type: string
     required:
+    - brand
+    - created_at
+    - description
     - id
     - name
-    type: object
-  models.ProductsVModel:
-    properties:
-      pagination:
-        $ref: '#/definitions/models.Pagination'
-      products:
-        items:
-          $ref: '#/definitions/models.ProductVModel'
-        type: array
+    - price
+    - stock_quantity
     type: object
 info:
   contact: {}
+  description: This is a sample server boilerplate_go server.
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
 paths:
   /products:
     get:
       consumes:
       - application/json
-      description: Retrieves a list of products with pagination
+      description: Retrieves products based on search query, page number and page
+        size.
       parameters:
-      - description: Search by name
+      - description: Search Keyword
         in: query
-        name: name
+        name: keyword
         type: string
-      - description: Filter by price
-        in: query
-        name: price
-        type: number
-      - description: Page number
+      - description: Page Number (>=1)
         in: query
         name: pageNumber
         required: true
         type: integer
-      - description: Page size
+      - description: Page Size (>=1)
         in: query
         name: pageSize
         required: true
@@ -64,8 +75,157 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.ProductsVModel'
-      summary: Get all products
+            $ref: '#/definitions/dto.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+      summary: Search Products
       tags:
-      - products
+      - Products
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product with the provided payload.
+      parameters:
+      - description: Product Data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProductDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ProductDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create Product
+      tags:
+      - Products
+  /products/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a product with the specified ID.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete Product
+      tags:
+      - Products
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a product by its identifier.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get Product By ID
+      tags:
+      - Products
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing product with the specified ID.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Product Data
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProductDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProductDto'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update Product
+      tags:
+      - Products
+  /products/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of all products.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ProductDto'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: List All Products
+      tags:
+      - Products
 swagger: "2.0"

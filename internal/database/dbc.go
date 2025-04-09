@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,11 +13,13 @@ import (
 )
 
 func InitDbClient() (*gorm.DB, error) {
-	dbUser := "root"
-	dbPass	:= "my-secret-pw"
-	dbHost := "localhost"
-	dbPort := "3307"
-	dbName := "ecommerce_db"
+	dbUser := os.Getenv("DB_USER")
+	dbPass	:= os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+	metricPort, _ := strconv.Atoi(os.Getenv("HTTP_METRIC_PORT"))
+
 	db, err := gorm.Open(mysql.Open(
 		fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 			dbUser, dbPass, dbHost, dbPort, dbName)),
@@ -32,9 +36,9 @@ func InitDbClient() (*gorm.DB, error) {
 	db.Use(prometheus.New(prometheus.Config{
 		DBName: dbName,
 		RefreshInterval: 15,
-		PushAddr: "127.0.0.1", // push metrics if `PushAddr` configured
+		PushAddr: dbHost, // push metrics if `PushAddr` configured
 		StartServer: true,
-		HTTPServerPort:  8081,  // configure http server port, default port 8080 (if you have configured multiple instances, only the first `HTTPServerPort` will be used to start server)
+		HTTPServerPort:  uint32(metricPort),  // configure http server port, default port 8080 (if you have configured multiple instances, only the first `HTTPServerPort` will be used to start server)
 		MetricsCollector: []prometheus.MetricsCollector {
 		  &prometheus.MySQL{
 			VariableNames: []string{"Threads_running"},
