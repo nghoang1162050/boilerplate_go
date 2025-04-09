@@ -1,41 +1,43 @@
 package main
 
 import (
-	"boilerplate_go/internal/cache"
-	"boilerplate_go/pkg/api/middlewares"
-	"boilerplate_go/pkg/pub_proc"
 	"log"
 
 	_ "boilerplate_go/docs"
+	"boilerplate_go/internal/controller"
+	"boilerplate_go/internal/database"
+	"boilerplate_go/internal/model"
+	"boilerplate_go/internal/repository"
+	"boilerplate_go/internal/router"
+	"boilerplate_go/internal/usecase"
+	"boilerplate_go/internal/utils"
 
 	"github.com/labstack/echo/v4"
-	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func main() {
-	// Initialize configuration
-	cache.RedisClient = &cache.CacheClient{}
-    if err := cache.RedisClient.NewRedisCache(); err != nil {
+	// gen entity models
+	// cmd.GenModels()
+
+	// Initialize Redis client
+	cacheClient := &utils.CacheClient{}
+	if err := cacheClient.NewRedisCache(); err != nil {
         log.Fatalf("Failed to initialize Redis: %v", err)
     }
+	utils.RedisClient = cacheClient
+
+	// Initialize database connection
+	db, err := database.InitDbClient()
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	productRepository := repository.NewRepository[model.Product](db)
+	productUseCase := usecase.NewProductUseCase(productRepository)
+	productController := controller.NewProductController(productUseCase)
 
 	e := echo.New()
-	
-	// Middleware
-	// e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
-	// 	XSSProtection:         "",
-	// 	ContentTypeNosniff:    "",
-	// 	XFrameOptions:         "",
-	// 	HSTSMaxAge:            3600,
-	// 	ContentSecurityPolicy: "default-src 'self'",
-	// }))
-	// custom middleware for retricted apis
-	e.Use(middlewares.AuthenticationMiddleware())
-	
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
-	// Routes
-	pub_proc.InitDbClient()
-	pub_proc.PublicRouter(e)
+	router.NewProductRouter(e, productController)
 
 	log.Fatal(e.Start(":8080"))
 }
