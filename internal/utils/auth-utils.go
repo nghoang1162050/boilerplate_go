@@ -22,3 +22,13 @@ func GenerateUserID(username string) string {
     id := uuid.NewSHA1(uuid.NameSpaceDNS, []byte(username))
     return id.String()
 }
+
+func ShouldIgnoreRequest(path string) bool {
+	allowing := map[string]bool{
+		"/api/auth/login":    true,
+		"/api/auth/register": true,
+		"/swagger/*":          true,
+	}
+
+    return allowing[path]
+}

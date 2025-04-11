@@ -4,6 +4,7 @@ type UserRegisterDTO struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Email    string `json:"email"`
+	RoleID   string `json:"role_id"`
 }
 
 type UserLoginDTO struct {

@@ -9,17 +9,10 @@ import (
 )
 
 func JWTMiddleware() echo.MiddlewareFunc {
-    // List of endpoints to ignore.
-    ignoredPaths := map[string]bool{
-        "/api/auth/register": true,
-        "/api/auth/login":    true,
-        "/swagger/*":    true,
-    }
-
     return func(next echo.HandlerFunc) echo.HandlerFunc {
         return func(c echo.Context) error {
             // If the request path is in the ignored list, simply pass to the next handler.
-            if ignoredPaths[c.Path()] {
+            if utils.ShouldIgnoreRequest(c.Path()) {
                 return next(c)
             }
 

@@ -17,10 +17,15 @@ func GenModels() {
     }
 
 	g := gen.NewGenerator(gen.Config{
-        OutPath: "internal/model",
+		ModelPkgPath: "internal/model",
+		Mode: gen.WithDefaultQuery | gen.WithQueryInterface,
     })
 
 	g.UseDB(db)
 	g.GenerateAllTable()
+
+	// users := g.GenerateModel("users", gen.FieldRelate(field.Many2Many, "Roles", "user_roles", nil))
+
+	// g.ApplyBasic(allModels["users"])
 	g.Execute()
 }

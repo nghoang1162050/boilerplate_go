@@ -10,17 +10,27 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func JWTSecret(username string) (string, int64, error) {
+type CustomClaims struct {
+    Roles []string `json:"roles"`
+    jwt.RegisteredClaims
+}
+
+func GenerateJWTToken(username string, roles []string) (string, int64, error) {
 	secret := os.Getenv("JWT_SECRET")
 	jwt_expired, _ := strconv.Atoi(os.Getenv("JWT_EXPIRATION"))
 	expired := time.Now().Add(time.Duration(jwt_expired) * time.Minute).Unix()
 
-	claims := &jwt.RegisteredClaims{
-		Issuer:    username,
-		Subject:  username,
-		IssuedAt:  jwt.NewNumericDate(time.Now()),
-		ExpiresAt: jwt.NewNumericDate(time.Unix(expired, 0)),
-	}
+	claims := &CustomClaims{
+        Roles: roles,
+        RegisteredClaims: jwt.RegisteredClaims{
+            ID:        GenerateUserID(username),
+            Audience:  jwt.ClaimStrings{username},
+            Issuer:    username,
+            Subject:   username,
+            IssuedAt:  jwt.NewNumericDate(time.Now()),
+            ExpiresAt: jwt.NewNumericDate(time.Unix(expired, 0)),
+        },
+    }
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	
@@ -30,9 +40,9 @@ func JWTSecret(username string) (string, int64, error) {
 }
 
 func ExtractUsernameFromToken(header string) (string, error) {
-	tokenString, err := ExtractTokenFromHeader(header)
+	tokenString, _ := ExtractTokenFromHeader(header)
 	secret := os.Getenv("JWT_SECRET")
-	claims := &jwt.RegisteredClaims{}
+	claims := &CustomClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
@@ -42,6 +52,21 @@ func ExtractUsernameFromToken(header string) (string, error) {
 	}
 
 	return claims.Subject, nil
+}
+
+func ExtractRolesFromToken(header string) ([]string, error) {
+	tokenString, _ := ExtractTokenFromHeader(header)
+	secret := os.Getenv("JWT_SECRET")
+	claims := &CustomClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+
+	return claims.Roles, nil
 }
 
 func ExtractTokenFromHeader(header string) (string, error) {

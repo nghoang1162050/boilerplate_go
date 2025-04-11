@@ -10,6 +10,7 @@ type BaseRepository[T any] interface {
 	Update(entity *T, id string) error
 	Delete(id string) error
     First(condition string, args ...interface{}) (*T, error)
+    FirstWithPreloads(condition string, preloads []string, args ...interface{}) (*T, error)
 }
 
 type baseRepository[T any] struct {
@@ -79,6 +80,18 @@ func (r *baseRepository[T]) Delete(id string) error {
 func (r *baseRepository[T]) First(condition string, args ...interface{}) (*T, error) {
     var entity T
     if err := r.db.Where(condition, args...).First(&entity).Error; err != nil {
+        return nil, err
+    }
+    return &entity, nil
+}
+
+func (r *baseRepository[T]) FirstWithPreloads(condition string, preloads []string, args ...interface{}) (*T, error) {
+    var entity T
+    query := r.db
+    for _, preload := range preloads {
+        query = query.Preload(preload)
+    }
+    if err := query.Where(condition, args...).First(&entity).Error; err != nil {
         return nil, err
     }
     return &entity, nil

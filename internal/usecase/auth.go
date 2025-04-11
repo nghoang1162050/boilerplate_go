@@ -18,10 +18,11 @@ type AuthUseCase interface {
 
 type authUseCase struct {
 	repo repository.BaseRepository[model.User]
+	userRepo repository.UserRepository
 }
 
-func NewAuthUseCase(repo repository.BaseRepository[model.User]) AuthUseCase {
-	return &authUseCase{repo: repo}
+func NewAuthUseCase(repo repository.BaseRepository[model.User], userRepo repository.UserRepository) AuthUseCase {
+	return &authUseCase{repo: repo, userRepo: userRepo}
 }
 
 func (a *authUseCase) Register(ctx context.Context, userDto *dto.UserRegisterDTO) (dto.BaseResponse, error) {
@@ -46,7 +47,7 @@ func (a *authUseCase) Register(ctx context.Context, userDto *dto.UserRegisterDTO
 		CreatedAt:    time.Now(),
 	}
 
-	if err := a.repo.Create(&newUser); err != nil {
+	if err := a.userRepo.Create(&newUser, userDto.RoleID); err != nil {
 		return dto.NewBaseResponse(500, "Failed to create user", nil), err
 	}
 
@@ -64,14 +65,15 @@ func (a *authUseCase) Login(ctx context.Context, username string, password strin
 		return dto.NewBaseResponse(400, "Invalid user info.", nil), nil
 	}
 
-	tokenString, expired, err := utils.JWTSecret(username)
+	// TODO: hardcoded role, should be replaced with a proper role management system.
+	tokenString, expired, err := utils.GenerateJWTToken(username, []string{"admin"})
 	if err != nil {
 		return dto.NewBaseResponse(500, "Failed to generate token", nil), err
 	}
 
 	loginResponse := dto.UserLoginResponse{
 		Username: username,
-		Role:     "todo",
+		Role:     "admin",
 		Token:    tokenString,
 		Expiry:   expired,
 	}

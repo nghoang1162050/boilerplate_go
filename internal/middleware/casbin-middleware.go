@@ -1,32 +1,31 @@
 package middleware
 
 import (
+	"boilerplate_go/internal/utils"
 	"net/http"
 
 	"github.com/casbin/casbin/v2"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
 func CasbinMiddleware(e *casbin.Enforcer) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			userToken := c.Get("user").(*jwt.Token)
-			claims := userToken.Claims.(jwt.MapClaims)
-			username := claims["username"].(string)
+			// Ignore certain requests based on the path and method
+			if utils.ShouldIgnoreRequest(c.Path()) {
+                return next(c)
+            }
 
-			obj := c.Path()
-			act := c.Request().Method
+			roles, _ := utils.ExtractRolesFromToken(c.Request().Header.Get("Authorization"))
+			for _, role := range roles {
+				path := c.Path()
+				method := c.Request().Method
+				if ok, _ := e.Enforce(role, path, method); ok {
+					return next(c)
+				}
+			}
 
-			ok, err := e.Enforce(username, obj, act)
-			if err != nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "Casbin error")
-			}
-			if !ok {
-				return echo.NewHTTPError(http.StatusForbidden, "Permission denied")
-			}
-			return next(c)
+			return echo.NewHTTPError(http.StatusForbidden, "Permission denied")
 		}
 	}
 }
-

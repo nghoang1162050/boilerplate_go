@@ -46,11 +46,14 @@ func main() {
 	}
 
 	// Initialize Casbin enforcer
-	// enforcer := utils.InitCasbin(db)
-
+	enforcer := utils.InitCasbin(db)
+	
+	// user repository
+	userRepository := repository.NewUserRepository(db)
+	
 	// auth repository, usecase, and controller
 	authRepository := repository.NewRepository[model.User](db)
-	authUseCase := usecase.NewAuthUseCase(authRepository)
+	authUseCase := usecase.NewAuthUseCase(authRepository, userRepository)
 	authController := controller.NewAuthController(authUseCase)
 
 	// product repository, usecase, and controller
@@ -65,13 +68,16 @@ func main() {
 	e.Use(middleware.JWTMiddleware())
 
 	// Authorization middleware
-	// e.Use(middleware.CasbinMiddleware(enforcer))
+	e.Use(middleware.CasbinMiddleware(enforcer))
 
 	router.NewProductRouter(apiGroup, productController)
 	router.NewAuthRouter(apiGroup, authController)
 
 	// Swagger documentation
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	// sync routes to Casbin
+	utils.SyncRoutersToCasbin(e, enforcer)
 
 	log.Fatal(e.Start(":8080"))
 }
