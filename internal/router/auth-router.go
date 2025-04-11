@@ -12,6 +12,6 @@ func NewAuthRouter(e *echo.Group, a controller.AuthController) {
 	authGroup.POST("/register", a.Register)
 	authGroup.POST("/login", a.Login)
 	// authGroup.POST("/logout", a.Logout)
-	// authGroup.GET("/profile", a.GetProfile)
+	authGroup.GET("/me", a.Me)
 	// authGroup.POST("/refresh-token", a.RefreshToken)
 }

@@ -13,6 +13,7 @@ import (
 type AuthUseCase interface {
 	Register(ctx context.Context, userDto *dto.UserRegisterDTO) (dto.BaseResponse, error)
 	Login(ctx context.Context, username, password string) (dto.BaseResponse, error)
+	Me(ctx context.Context, username string) (dto.BaseResponse, error)
 }
 
 type authUseCase struct {
@@ -71,9 +72,26 @@ func (a *authUseCase) Login(ctx context.Context, username string, password strin
 	loginResponse := dto.UserLoginResponse{
 		Username: username,
 		Role:     "todo",
-		Token:  tokenString,
-		Expiry: expired,
+		Token:    tokenString,
+		Expiry:   expired,
 	}
 
 	return dto.NewBaseResponse(200, "Login successful", loginResponse), nil
+}
+
+// Me implements AuthUseCase.
+func (a *authUseCase) Me(ctx context.Context, username string) (dto.BaseResponse, error) {
+	existingUser, err := a.repo.First("username = ?", username)
+	if err != nil || existingUser == nil {
+		return dto.NewBaseResponse(400, "Invalid user info.", nil), err
+	}
+
+	userDto := dto.UserDTO{
+		ID:        existingUser.ID,
+		Username:  existingUser.Username,
+		Email:     existingUser.Email,
+		CreatedAt: existingUser.CreatedAt.Format(time.RFC3339),
+	}
+
+	return dto.NewBaseResponse(200, "", userDto), nil
 }
