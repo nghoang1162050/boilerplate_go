@@ -1,0 +1,2 @@
+CREATE USER 'grafana'@'%' IDENTIFIED BY 'grafana_pass';
+GRANT SELECT ON ecommerce_db.* TO 'grafana'@'%';
