@@ -1,7 +1,9 @@
 package main
 
 import (
-	"log"
+	"os"
+
+	log "github.com/sirupsen/logrus"
 
 	_ "boilerplate_go/docs"
 	"boilerplate_go/internal/controller"
@@ -15,6 +17,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	echoMiddleWare "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
@@ -24,6 +27,9 @@ import (
 // @termsOfService http://swagger.io/terms/
 // @BasePath /api
 func main() {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetOutput(os.Stdout)
+
 	// gen entity models
 	// cmd.GenModels()
 	
@@ -61,7 +67,13 @@ func main() {
 	productUseCase := usecase.NewProductUseCase(productRepository)
 	productController := controller.NewProductController(productUseCase)
 
+	// echo app instance
 	e := echo.New()
+	e.Use(echoMiddleWare.LoggerWithConfig(echoMiddleWare.LoggerConfig{
+		Format: `{"time":"${time_rfc3339}","remote_ip":"${remote_ip}","host":"${host}","method":"${method}","uri":"${uri}","status":${status}}` + "\n",
+		Output: os.Stdout,
+	}))
+
 	apiGroup := e.Group("/api")
 
 	// Authentication middleware
