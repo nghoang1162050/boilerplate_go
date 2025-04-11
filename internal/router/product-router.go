@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func NewProductRouter(e *echo.Echo, p controller.ProductController) {
+func NewProductRouter(e *echo.Group, p controller.ProductController) {
 	productsGroup := e.Group("/products")
 
 	productsGroup.GET("", p.Search)

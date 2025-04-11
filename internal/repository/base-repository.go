@@ -9,6 +9,7 @@ type BaseRepository[T any] interface {
 	Create(entity *T) error
 	Update(entity *T, id string) error
 	Delete(id string) error
+    First(condition string, args ...interface{}) (*T, error)
 }
 
 type baseRepository[T any] struct {
@@ -73,4 +74,12 @@ func (r *baseRepository[T]) Update(entity *T, id string) error {
 func (r *baseRepository[T]) Delete(id string) error {
     var entity T
     return r.db.Delete(&entity, "id = ?", id).Error
+}
+
+func (r *baseRepository[T]) First(condition string, args ...interface{}) (*T, error) {
+    var entity T
+    if err := r.db.Where(condition, args...).First(&entity).Error; err != nil {
+        return nil, err
+    }
+    return &entity, nil
 }
