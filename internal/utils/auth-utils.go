@@ -28,6 +28,7 @@ func ShouldIgnoreRequest(path string) bool {
 		"/api/auth/login":    true,
 		"/api/auth/register": true,
 		"/swagger/*":          true,
+		"/metrics":          true,
 	}
 
     return allowing[path]

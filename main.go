@@ -16,6 +16,7 @@ import (
 	"boilerplate_go/internal/utils"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	echoMiddleWare "github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -73,6 +74,10 @@ func main() {
 		Format: `{"time":"${time_rfc3339}","remote_ip":"${remote_ip}","host":"${host}","method":"${method}","uri":"${uri}","status":${status}}` + "\n",
 		Output: os.Stdout,
 	}))
+
+	// Prometheus middleware
+    p := prometheus.NewPrometheus("echo", nil)
+    p.Use(e)
 
 	apiGroup := e.Group("/api")
 
