@@ -33,9 +33,9 @@ func NewProductController(productUseCase usecase.ProductUseCase) ProductControll
 // @Param keyword query string false "Search Keyword"
 // @Param pageNumber query int true "Page Number (>=1)"
 // @Param pageSize query int true "Page Size (>=1)"
-// @Success 200 {object} dto.BaseResponse
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {object} dto.BaseResponse
+// @Success 200 {object} dto.BaseResponse "Success"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
 // @Router /products [get]
 func (p *productController) Search(ctx echo.Context) error {
 	var searchModel dto.SearchProductDto
@@ -57,8 +57,8 @@ func (p *productController) Search(ctx echo.Context) error {
 // @Tags Products
 // @Accept json
 // @Produce json
-// @Success 200 {array} dto.ProductDto
-// @Failure 500 {string} string "Internal Server Error"
+// @Success 200 {array} dto.ProductDto "List of products"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
 // @Router /products/all [get]
 func (p *productController) GetAll(ctx echo.Context) error {
 	products, err := p.productUseCase.GetAll()
@@ -76,9 +76,9 @@ func (p *productController) GetAll(ctx echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "Product ID"
-// @Success 200 {object} dto.ProductDto
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
+// @Success 200 {object} dto.ProductDto "Product found"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
 // @Router /products/{id} [get]
 func (p *productController) GetByID(ctx echo.Context) error {
 	idParam := ctx.Param("id")
@@ -96,9 +96,9 @@ func (p *productController) GetByID(ctx echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param product body dto.ProductDto true "Product Data"
-// @Success 201 {object} dto.ProductDto
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
+// @Success 201 {object} dto.ProductDto "Product created"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
 // @Router /products [post]
 func (p *productController) Create(ctx echo.Context) error {
 	var productDto dto.ProductDto
@@ -122,9 +122,9 @@ func (p *productController) Create(ctx echo.Context) error {
 // @Produce json
 // @Param id path string true "Product ID"
 // @Param product body dto.ProductDto true "Updated Product Data"
-// @Success 200 {object} dto.ProductDto
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
+// @Success 200 {object} dto.ProductDto "Product updated"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
 // @Router /products/{id} [put]
 func (p *productController) Update(ctx echo.Context) error {
 	var productDto dto.ProductDto
@@ -148,8 +148,8 @@ func (p *productController) Update(ctx echo.Context) error {
 // @Produce json
 // @Param id path string true "Product ID"
 // @Success 204 {string} string "No Content"
-// @Failure 400 {string} string "Bad Request"
-// @Failure 500 {string} string "Internal Server Error"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
 // @Router /products/{id} [delete]
 func (p *productController) Delete(ctx echo.Context) error {
 	id := ctx.Param("id")

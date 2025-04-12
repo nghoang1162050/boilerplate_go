@@ -22,7 +22,7 @@ import (
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
-// @title Swagger Example API
+// @title Boilerplate Go API
 // @version 1.0
 // @description This is a sample server boilerplate_go server.
 // @termsOfService http://swagger.io/terms/

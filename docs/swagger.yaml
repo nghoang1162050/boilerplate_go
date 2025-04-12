@@ -55,6 +55,8 @@ definitions:
         type: string
       password:
         type: string
+      role_id:
+        type: string
       username:
         type: string
     type: object
@@ -62,7 +64,7 @@ info:
   contact: {}
   description: This is a sample server boilerplate_go server.
   termsOfService: http://swagger.io/terms/
-  title: Swagger Example API
+  title: Boilerplate Go API
   version: "1.0"
 paths:
   /auth/login:
@@ -148,6 +150,130 @@ paths:
       summary: Register a new user
       tags:
       - Auth
+  /files/delete:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a file with the specified object name.
+      parameters:
+      - description: Object name
+        in: query
+        name: object_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: File deleted successfully
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+      summary: Delete File
+      tags:
+      - Files
+  /files/download:
+    get:
+      consumes:
+      - application/json
+      description: Downloads a file identified by the object name.
+      parameters:
+      - description: Object name
+        in: query
+        name: object_name
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: File content
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "404":
+          description: File Not Found
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+      summary: Download File
+      tags:
+      - Files
+  /files/search:
+    get:
+      consumes:
+      - application/json
+      description: Searches and retrieves a list of files that match the given prefix.
+      parameters:
+      - description: Prefix for file search
+        in: query
+        name: prefix
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "404":
+          description: No files found
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+      summary: Search Files
+      tags:
+      - Files
+  /files/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file using multipart form data.
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.BaseResponse'
+      summary: Upload File
+      tags:
+      - Files
   /products:
     get:
       consumes:
@@ -173,13 +299,13 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Success
           schema:
             $ref: '#/definitions/dto.BaseResponse'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
@@ -202,17 +328,17 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Product created
           schema:
             $ref: '#/definitions/dto.ProductDto'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
       summary: Create Product
       tags:
       - Products
@@ -237,11 +363,11 @@ paths:
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
       summary: Delete Product
       tags:
       - Products
@@ -259,17 +385,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Product found
           schema:
             $ref: '#/definitions/dto.ProductDto'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
       summary: Get Product By ID
       tags:
       - Products
@@ -293,17 +419,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Product updated
           schema:
             $ref: '#/definitions/dto.ProductDto'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
       summary: Update Product
       tags:
       - Products
@@ -316,7 +442,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: List of products
           schema:
             items:
               $ref: '#/definitions/dto.ProductDto'
@@ -324,7 +450,7 @@ paths:
         "500":
           description: Internal Server Error
           schema:
-            type: string
+            $ref: '#/definitions/dto.BaseResponse'
       summary: List All Products
       tags:
       - Products

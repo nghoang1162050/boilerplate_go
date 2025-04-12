@@ -28,6 +28,16 @@ func NewFileController(fileUseCase usecase.FileUseCase) FileController {
 }
 
 // Upload implements FileController.
+// @Summary Upload File
+// @Description Uploads a file using multipart form data.
+// @Tags Files
+// @Accept multipart/form-data
+// @Produce json
+// @Param file formData file true "File to upload"
+// @Success 200 {object} dto.BaseResponse "Success"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
+// @Router /files/upload [post]
 func (f *fileController) Upload(ctx echo.Context) error {
 	file, err := ctx.FormFile("file")
 	if err != nil {
@@ -56,6 +66,16 @@ func (f *fileController) Upload(ctx echo.Context) error {
 }
 
 // Delete implements FileController.
+// @Summary Delete File
+// @Description Deletes a file with the specified object name.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param object_name query string true "Object name"
+// @Success 200 {object} dto.BaseResponse "File deleted successfully"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
+// @Router /files/delete [delete]
 func (f *fileController) Delete(ctx echo.Context) error {
 	objectName := ctx.QueryParam("object_name")
 	if objectName == "" {
@@ -71,6 +91,17 @@ func (f *fileController) Delete(ctx echo.Context) error {
 }
 
 // Download implements FileController.
+// @Summary Download File
+// @Description Downloads a file identified by the object name.
+// @Tags Files
+// @Accept json
+// @Produce octet-stream
+// @Param object_name query string true "Object name"
+// @Success 200 {file} file "File content"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 404 {object} dto.BaseResponse "File Not Found"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
+// @Router /files/download [get]
 func (f *fileController) Download(ctx echo.Context) error {
 	objectName := ctx.QueryParam("object_name")
 	if objectName == "" {
@@ -90,6 +121,17 @@ func (f *fileController) Download(ctx echo.Context) error {
 }
 
 // Search implements FileController.
+// @Summary Search Files
+// @Description Searches and retrieves a list of files that match the given prefix.
+// @Tags Files
+// @Accept json
+// @Produce json
+// @Param prefix query string true "Prefix for file search"
+// @Success 200 {object} dto.BaseResponse "Success"
+// @Failure 400 {object} dto.BaseResponse "Bad Request"
+// @Failure 404 {object} dto.BaseResponse "No files found"
+// @Failure 500 {object} dto.BaseResponse "Internal Server Error"
+// @Router /files/search [get]
 func (f *fileController) Search(ctx echo.Context) error {
 	prefix := ctx.QueryParam("prefix")
 	if prefix == "" {
