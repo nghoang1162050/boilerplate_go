@@ -54,7 +54,14 @@ func main() {
 
 	// Initialize Casbin enforcer
 	enforcer := utils.InitCasbin(db)
-	
+
+	// File storage client
+	fileClient := &utils.MinioClient{}
+	if err := fileClient.NewMinioClient(); err != nil {
+		log.Fatalf("Failed to initialize Minio: %v", err)
+	}
+	utils.FileClient = fileClient
+
 	// user repository
 	userRepository := repository.NewUserRepository(db)
 	
@@ -67,6 +74,9 @@ func main() {
 	productRepository := repository.NewRepository[model.Product](db)
 	productUseCase := usecase.NewProductUseCase(productRepository)
 	productController := controller.NewProductController(productUseCase)
+
+	fileUserCase := usecase.NewFileUseCase()
+	fileController := controller.NewFileController(fileUserCase)
 
 	// echo app instance
 	e := echo.New()
@@ -89,6 +99,7 @@ func main() {
 
 	router.NewProductRouter(apiGroup, productController)
 	router.NewAuthRouter(apiGroup, authController)
+	router.NewFileRouter(apiGroup, fileController)
 
 	// Swagger documentation
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
