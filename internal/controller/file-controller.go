@@ -57,15 +57,53 @@ func (f *fileController) Upload(ctx echo.Context) error {
 
 // Delete implements FileController.
 func (f *fileController) Delete(ctx echo.Context) error {
-	panic("unimplemented")
+	objectName := ctx.QueryParam("object_name")
+	if objectName == "" {
+		return ctx.JSON(http.StatusBadRequest, dto.NewBaseResponse(400, "Object name is required", nil))
+	}
+
+	if err := f.fileUseCase.Delete(ctx.Request().Context(), objectName); err != nil {
+		log.Error("Error deleting file: ", err)
+		return ctx.JSON(http.StatusInternalServerError, dto.NewBaseResponse(500, "Error deleting file", err.Error()))
+	}
+
+	return ctx.JSON(http.StatusOK, dto.NewBaseResponse(200, "File deleted successfully", nil))
 }
 
 // Download implements FileController.
 func (f *fileController) Download(ctx echo.Context) error {
-	panic("unimplemented")
+	objectName := ctx.QueryParam("object_name")
+	if objectName == "" {
+		return ctx.JSON(http.StatusBadRequest, dto.NewBaseResponse(400, "Object name is required", nil))
+	}
+
+	file, err := f.fileUseCase.Download(ctx.Request().Context(), objectName)
+	if err != nil {
+		log.Error("Error downloading file: ", err)
+		return ctx.JSON(http.StatusInternalServerError, dto.NewBaseResponse(500, "Error downloading file", err.Error()))
+	}
+	if file == nil {
+		return ctx.JSON(http.StatusNotFound, dto.NewBaseResponse(404, "File not found", nil))
+	}
+
+	return ctx.Stream(http.StatusOK, "application/octet-stream", file)
 }
 
 // Search implements FileController.
 func (f *fileController) Search(ctx echo.Context) error {
-	return nil
+	prefix := ctx.QueryParam("prefix")
+	if prefix == "" {
+		return ctx.JSON(http.StatusBadRequest, dto.NewBaseResponse(400, "Prefix is required", nil))
+	}
+
+	files, err := f.fileUseCase.Search(ctx.Request().Context(), prefix)
+	if err != nil {
+		log.Error("Error searching files: ", err)
+		return ctx.JSON(http.StatusInternalServerError, dto.NewBaseResponse(500, "Error searching files", err.Error()))
+	}
+	if len(files) == 0 {
+		return ctx.JSON(http.StatusNotFound, dto.NewBaseResponse(404, "No files found", nil))
+	}
+
+	return ctx.JSON(http.StatusOK, dto.NewBaseResponse(200, "Success", files))
 }

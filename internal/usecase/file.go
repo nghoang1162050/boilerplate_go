@@ -4,14 +4,15 @@ import (
 	"boilerplate_go/internal/dto"
 	"boilerplate_go/internal/utils"
 	"context"
+	"io"
 	"mime/multipart"
 )
 
 type FileUseCase interface {
 	Upload(ctx context.Context, src multipart.File, fileDto *dto.FileDto) error
-	Download() error
-	Delete() error
-	Search() error
+	Download(ctx context.Context, objectName string) (io.Reader, error)
+	Delete(ctx context.Context, objectName string) error
+	Search(ctx context.Context, prefix string) ([]string, error)
 }
 
 type fileUseCase struct {
@@ -31,16 +32,31 @@ func (f *fileUseCase) Upload(ctx context.Context, src multipart.File, fileDto *d
 }
 
 // Delete implements FileUseCase.
-func (f *fileUseCase) Delete() error {
-	panic("unimplemented")
+func (f *fileUseCase) Delete(ctx context.Context, objectName string) error {
+	return utils.FileClient.Delete(ctx, objectName)
 }
 
 // Download implements FileUseCase.
-func (f *fileUseCase) Download() error {
-	panic("unimplemented")
+func (f *fileUseCase) Download(ctx context.Context, objectName string) (io.Reader, error) {
+	fileContent, err := utils.FileClient.Download(ctx, objectName)
+	if err != nil {
+		return nil, err
+	}
+
+	return fileContent, nil
 }
 
 // Search implements FileUseCase.
-func (f *fileUseCase) Search() error {
-	panic("unimplemented")
+func (f *fileUseCase) Search(ctx context.Context, prefix string) ([]string, error) {
+	objectCh := utils.FileClient.List(ctx, prefix)
+
+	var files []string
+	for object := range objectCh {
+		if object.Err != nil {
+			return nil, object.Err
+		}
+		files = append(files, object.Key)
+	}
+
+	return files, nil
 }

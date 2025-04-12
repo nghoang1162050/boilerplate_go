@@ -10,7 +10,7 @@ func NewFileRouter(e *echo.Group, f controller.FileController) {
 	productsGroup := e.Group("/files")
 
 	productsGroup.GET("", f.Search)
-	productsGroup.GET("/:id", f.Download)
+	productsGroup.GET("/download", f.Download)
 	productsGroup.POST("", f.Upload)
-	productsGroup.DELETE("/:id", f.Delete)
+	productsGroup.DELETE("", f.Delete)
 }

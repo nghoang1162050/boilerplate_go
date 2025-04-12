@@ -49,3 +49,26 @@ func (f *MinioClient) Upload(ctx context.Context, objectName string, reader io.R
 
     return nil
 }
+
+func (f *MinioClient) List(ctx context.Context, prefix string) <-chan minio.ObjectInfo {
+	objectCh := f.minioClient.ListObjects(ctx, f.bucketName, minio.ListObjectsOptions{Prefix: prefix, Recursive: true})
+	return objectCh
+}
+
+func (f *MinioClient) Download(ctx context.Context, objectName string) (io.Reader, error) {
+	opts := minio.GetObjectOptions{}
+	object, err := f.minioClient.GetObject(ctx, f.bucketName, objectName, opts)
+	if err != nil {
+		return nil, err
+	}
+	return object, nil
+}
+
+func (f *MinioClient) Delete(ctx context.Context, objectName string) error {
+	opts := minio.RemoveObjectOptions{}
+	err := f.minioClient.RemoveObject(ctx, f.bucketName, objectName, opts)
+	if err != nil {
+		return err
+	}
+	return nil
+}
